@@ -1,0 +1,283 @@
+/* ============================================================
+   RTI+ Design Tokens
+   Subject: Indian government paperwork — carbon-copy forms,
+   file registers, rubber stamps, brass clips, ledger rules.
+   ============================================================ */
+:root {
+  --paper: #F2EEE1;
+  --paper-raised: #FBF8F0;
+  --ink: #201D1A;
+  --ink-soft: #5A5347;
+  --rule: #D8D0BC;
+  --stamp-red: #A8362A;
+  --stamp-red-soft: #F1DAD5;
+  --registry-green: #3C5940;
+  --registry-green-soft: #DCE5DC;
+  --brass: #A9822E;
+  --brass-soft: #EFE3C4;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 2px;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+body {
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px);
+  background-size: 100% 34px;
+  background-attachment: local;
+}
+
+a { color: inherit; }
+
+::selection { background: var(--brass-soft); }
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 80px;
+}
+
+/* ---------- header / masthead ---------- */
+.masthead {
+  border-bottom: 3px double var(--ink);
+  padding-bottom: 14px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.masthead .mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+.masthead .mark small {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-soft);
+  display: block;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.file-ref {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: right;
+  line-height: 1.5;
+}
+
+/* ---------- nav tabs (folder tabs) ---------- */
+.folder-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 18px 0 22px;
+  border-bottom: 1px solid var(--rule);
+}
+.folder-tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 9px 14px 8px;
+  background: var(--rule);
+  color: var(--ink-soft);
+  border: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  cursor: pointer;
+  position: relative;
+  top: 1px;
+}
+.folder-tab.active {
+  background: var(--paper-raised);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-bottom: 1px solid var(--paper-raised);
+  font-weight: 600;
+}
+
+/* ---------- card: carbon-copy sheet ---------- */
+.sheet {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 16px;
+  position: relative;
+  box-shadow: 3px 3px 0 rgba(32,29,26,0.05);
+}
+.sheet::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 11px);
+  opacity: 0.15;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0 0 8px;
+  line-height: 1.15;
+}
+h1 { font-size: 26px; }
+h2 { font-size: 19px; }
+h3 { font-size: 15px; }
+
+p { line-height: 1.55; color: var(--ink); }
+.muted { color: var(--ink-soft); font-size: 13.5px; }
+
+/* ---------- form elements ---------- */
+label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 14px 0 5px;
+}
+input, textarea, select {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+}
+textarea { resize: vertical; min-height: 90px; }
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--brass);
+  outline-offset: 1px;
+  border-color: var(--brass);
+}
+
+button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 11px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper-raised);
+  cursor: pointer;
+}
+button:hover { opacity: 0.9; }
+button.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+button.danger {
+  background: var(--stamp-red);
+  border-color: var(--stamp-red);
+}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; }
+
+/* ---------- stamp badge ---------- */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  transform: rotate(-1.5deg);
+}
+.stamp.pending { color: var(--brass); background: var(--brass-soft); }
+.stamp.filed { color: var(--registry-green); background: var(--registry-green-soft); }
+.stamp.overdue { color: var(--stamp-red); background: var(--stamp-red-soft); }
+.stamp.escalated { color: var(--stamp-red); background: var(--stamp-red-soft); }
+
+/* ---------- officer directory ---------- */
+.officer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.officer-row:last-child { border-bottom: none; }
+.officer-name { font-weight: 600; font-size: 14px; }
+.officer-dept { font-size: 12px; color: var(--ink-soft); }
+.load-bar {
+  width: 70px;
+  height: 5px;
+  background: var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.load-bar > div { height: 100%; background: var(--registry-green); }
+.load-bar.high > div { background: var(--stamp-red); }
+.load-bar.mid > div { background: var(--brass); }
+
+/* ---------- timeline ---------- */
+.timeline { border-left: 2px solid var(--rule); padding-left: 16px; margin: 14px 0; }
+.timeline-item { position: relative; padding-bottom: 16px; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -21px; top: 3px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--paper-raised);
+}
+.timeline-item.done::before { background: var(--registry-green); }
+.timeline-item.warn::before { background: var(--stamp-red); }
+.timeline-date { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); }
+
+/* ---------- misc ---------- */
+.divider { border: none; border-top: 1px dashed var(--rule); margin: 18px 0; }
+.error-box {
+  background: var(--stamp-red-soft);
+  color: var(--stamp-red);
+  border: 1px solid var(--stamp-red);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin: 12px 0;
+}
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-soft);
+}
+code, .mono { font-family: var(--font-mono); }
