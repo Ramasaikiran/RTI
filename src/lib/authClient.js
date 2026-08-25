@@ -11,15 +11,11 @@ async function post(path, body) {
   return data
 }
 
-export const registerRequestOtp = (name, email, address) =>
-  post('/api/auth/register/request-otp', { name, email, address })
-export const registerVerify = (email, otp) =>
-  post('/api/auth/register/verify', { email, otp })
+export const register = (name, email, address, password, confirmPassword) =>
+  post('/api/auth/register', { name, email, address, password, confirmPassword })
 
-export const loginRequestOtp = (email) =>
-  post('/api/auth/login/request-otp', { email })
-export const loginVerify = (email, otp) =>
-  post('/api/auth/login/verify', { email, otp })
+export const login = (email, password) =>
+  post('/api/auth/login', { email, password })
 
 export async function getSession(token) {
   const res = await fetch(`${API_BASE}/api/session`, {

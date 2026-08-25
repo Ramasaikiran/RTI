@@ -8,7 +8,7 @@ sit unaddressed.
 
 | Part | Status |
 |---|---|
-| Login | **Real** — email OTP via Resend, hashed + expiring codes, JWT sessions. No third-party auth provider. |
+| Login | **Real** — email + password, bcrypt-hashed, JWT sessions. No third-party auth provider. |
 | Officer directory | Mock data, `src/data/officers.js` |
 | Assignment engine | Real logic, mock data — routes to least-loaded officer |
 | Draft agent | Local template drafter by default; swap in a real LLM via `VITE_DRAFT_API_URL` |
@@ -17,11 +17,11 @@ sit unaddressed.
 
 ## Run it
 
-**1. Backend (OTP server)**
+**1. Backend (auth server)**
 ```bash
 cd server
 npm install
-cp .env.example .env   # add your Resend API key
+cp .env.example .env   # set a real JWT_SECRET
 npm start               # runs on :8787
 ```
 
@@ -32,21 +32,15 @@ cp .env.example .env   # VITE_API_URL=http://localhost:8787 (default is fine)
 npm run dev
 ```
 
-Get a free Resend API key at resend.com — 100 emails/day on the free
-tier, no domain verification needed to start (uses `onboarding@resend.dev`
-as sender).
-
 ## How login works
 
-1. User enters email → backend generates a 6-digit code, hashes it,
-   stores it in memory with a 5-minute expiry, emails it via Resend
-2. User enters the code → backend compares hashes, issues a signed
-   JWT (7-day session)
+1. Register: name, email, postal address, password + confirm →
+   backend hashes the password with bcrypt, stores the profile,
+   issues a signed JWT (7-day session)
+2. Login: email + password → backend compares the bcrypt hash,
+   issues a JWT on match
 3. Frontend stores the JWT and sends it on `/api/session` to restore
    login on refresh
-
-Rate-limited to one send per 30 seconds per email, 5 verify attempts
-per code.
 
 ## The three features this adds over rtionline.gov.in
 
