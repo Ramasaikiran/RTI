@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getSession } from './lib/authClient'
-import Auth from './components/Auth'
+import Register from './components/Register'
+import Login from './components/Login'
 import NewRequest from './components/NewRequest'
 import Directory from './components/Directory'
 import StatusTracker from './components/StatusTracker'
@@ -10,6 +11,7 @@ export default function App() {
   const [checkingSession, setCheckingSession] = useState(true)
   const [tab, setTab] = useState('new')
   const [requests, setRequests] = useState([])
+  const [authView, setAuthView] = useState('login')
 
   useEffect(() => {
     const token = localStorage.getItem('rtiplus_token')
@@ -57,7 +59,11 @@ export default function App() {
       </div>
 
       {!user ? (
-        <Auth onAuthed={setUser} />
+        authView === 'login' ? (
+          <Login onAuthed={setUser} switchToRegister={() => setAuthView('register')} />
+        ) : (
+          <Register onAuthed={setUser} switchToLogin={() => setAuthView('login')} />
+        )
       ) : (
         <>
           <div className="folder-tabs">

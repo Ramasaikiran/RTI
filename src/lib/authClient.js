@@ -1,6 +1,6 @@
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8787'
 
-async function req(path, body) {
+async function post(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -11,8 +11,15 @@ async function req(path, body) {
   return data
 }
 
-export const requestOtp = (email) => req('/api/otp/request', { email })
-export const verifyOtp = (email, otp) => req('/api/otp/verify', { email, otp })
+export const registerRequestOtp = (name, email, address) =>
+  post('/api/auth/register/request-otp', { name, email, address })
+export const registerVerify = (email, otp) =>
+  post('/api/auth/register/verify', { email, otp })
+
+export const loginRequestOtp = (email) =>
+  post('/api/auth/login/request-otp', { email })
+export const loginVerify = (email, otp) =>
+  post('/api/auth/login/verify', { email, otp })
 
 export async function getSession(token) {
   const res = await fetch(`${API_BASE}/api/session`, {
