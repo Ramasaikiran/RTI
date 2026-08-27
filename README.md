@@ -1,4 +1,4 @@
-# RTI+ — a working prototype
+# RTI+ - a working prototype
 
 Built for the "Build What Moves India" brief: IRCTC's redesign already
 shipped, so this targets RTI Online instead, where the real gaps still
@@ -8,9 +8,9 @@ sit unaddressed.
 
 | Part | Status |
 |---|---|
-| Login | **Real** — email + password, bcrypt-hashed, JWT sessions. No third-party auth provider. |
+| Login | **Real** - email + password, bcrypt-hashed, JWT sessions. No third-party auth provider. |
 | Officer directory | Mock data, `src/data/officers.js` |
-| Assignment engine | Real logic, mock data — routes to least-loaded officer |
+| Assignment engine | Real logic, mock data - routes to least-loaded officer |
 | Draft agent | Local template drafter by default; swap in a real LLM via `VITE_DRAFT_API_URL` |
 | 30-day deadline tracking | Real client-side date math |
 | First Appeal auto-draft | Real logic, triggers once deadline passes |
@@ -44,11 +44,11 @@ npm run dev
 
 ## The three features this adds over rtionline.gov.in
 
-1. **Officer directory** — the real portal never shows who's handling
+1. **Officer directory** - the real portal never shows who's handling
    your request or how busy they are. This does.
-2. **Load-aware assignment** — new requests route to whichever officer
+2. **Load-aware assignment** - new requests route to whichever officer
    in that department has the lowest pending count, not a black box.
-3. **Plain-English drafting** — type what you actually want to know;
+3. **Plain-English drafting** - type what you actually want to know;
    the agent produces a Section 6(1)-compliant formal application.
 
 ## Next steps for a real deployment

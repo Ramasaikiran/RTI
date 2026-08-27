@@ -13,7 +13,7 @@ export default function StatusTracker({ requests, onEscalate }) {
     return (
       <div className="sheet empty-state">
         <h3>No applications filed yet</h3>
-        <p className="muted">File one from the "New request" tab — it'll show up here with a live 30-day countdown.</p>
+        <p className="muted">File one from the "New request" tab - it'll show up here with a live 30-day countdown.</p>
       </div>
     )
   }
@@ -54,7 +54,7 @@ function RequestCard({ r, onEscalate }) {
           <div className="timeline-date">
             {new Date(r.filedAt.getTime() + 30 * DAY).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
           </div>
-          <div>Statutory 30-day reply deadline {overdue ? '— passed, no response logged' : ''}</div>
+          <div>Statutory 30-day reply deadline {overdue ? '- passed, no response logged' : ''}</div>
         </div>
         {r.escalated && (
           <div className="timeline-item warn">

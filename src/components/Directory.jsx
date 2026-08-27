@@ -8,7 +8,7 @@ export default function Directory() {
       <h2>Officer directory</h2>
       <p className="muted">
         Every Public Information Officer, their department, and current
-        pending load — so assignment isn't a black box.
+        pending load - so assignment isn't a black box.
       </p>
       <hr className="divider" />
       {sorted.map(o => (

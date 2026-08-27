@@ -15,7 +15,7 @@ export default function Disclosure() {
         <div style={{ marginTop: 12, fontSize: 13 }}>
           <p><strong>Real:</strong> account login (bcrypt-hashed passwords, JWT sessions), AI drafting via OpenAI, 30-day deadline math, assignment logic.</p>
           <p><strong>Mocked:</strong> officer directory and their pending-load numbers, department routing keywords, application filing (nothing is sent to a real government office).</p>
-          <p className="muted">Built for the "Build What Moves India" brief — targets RTI Online, since IRCTC's own redesign already shipped in July 2026.</p>
+          <p className="muted">Built for the "Build What Moves India" brief - targets RTI Online, since IRCTC's own redesign already shipped in July 2026.</p>
         </div>
       )}
     </div>

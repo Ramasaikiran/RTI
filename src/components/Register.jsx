@@ -45,7 +45,7 @@ export default function Register({ onAuthed, switchToLogin }) {
         <textarea
           value={address}
           onChange={e => setAddress(e.target.value)}
-          placeholder="Required — RTI applications must carry a mailing address"
+          placeholder="Required - RTI applications must carry a mailing address"
           style={{ minHeight: 64 }}
           required
         />

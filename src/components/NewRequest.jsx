@@ -38,7 +38,7 @@ export default function NewRequest({ applicantName, onFiled }) {
 
   return (
     <div className="sheet">
-      <div className="eyebrow">Step one — describe it plainly</div>
+      <div className="eyebrow">Step one - describe it plainly</div>
       <h2>What do you want to know?</h2>
       <p className="muted">Write it the way you'd say it out loud. The agent handles the legal language.</p>
 
@@ -59,7 +59,7 @@ export default function NewRequest({ applicantName, onFiled }) {
       {step === 'review' && (
         <>
           <hr className="divider" />
-          <div className="eyebrow">Step two — routed &amp; assigned</div>
+          <div className="eyebrow">Step two - routed &amp; assigned</div>
           <div className="row" style={{ marginBottom: 10 }}>
             <div className="sheet" style={{ margin: 0, padding: 14 }}>
               <div className="muted" style={{ fontSize: 11.5 }}>Department</div>
@@ -72,7 +72,7 @@ export default function NewRequest({ applicantName, onFiled }) {
             </div>
           </div>
 
-          <div className="eyebrow" style={{ marginTop: 16 }}>Step three — review draft</div>
+          <div className="eyebrow" style={{ marginTop: 16 }}>Step three - review draft</div>
           <textarea
             value={draft}
             onChange={e => setDraft(e.target.value)}

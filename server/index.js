@@ -9,7 +9,7 @@ app.use(cors())
 app.use(express.json())
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
-if (!process.env.JWT_SECRET) console.warn('[warn] JWT_SECRET not set — using an insecure default.')
+if (!process.env.JWT_SECRET) console.warn('[warn] JWT_SECRET not set - using an insecure default.')
 
 // In-memory store for demo purposes. Swap for Postgres in production.
 const users = new Map() // email -> { name, address, email, passwordHash, createdAt }
@@ -28,7 +28,7 @@ app.post('/api/auth/register', async (req, res) => {
 
   if (!name?.trim()) return res.status(400).json({ error: 'Full name is required.' })
   if (!isEmail(email)) return res.status(400).json({ error: 'Valid email is required.' })
-  if (!address?.trim()) return res.status(400).json({ error: 'Postal address is required — RTI applications need it on file.' })
+  if (!address?.trim()) return res.status(400).json({ error: 'Postal address is required - RTI applications need it on file.' })
   if (!password || password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' })
   if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match.' })
   if (users.has(email)) return res.status(409).json({ error: 'An account already exists for this email. Try logging in instead.' })
@@ -85,7 +85,7 @@ app.post('/api/draft', async (req, res) => {
   }
 
   const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
-  const systemPrompt = `You draft formal Indian Right to Information (RTI) applications under Section 6(1) of the RTI Act, 2005. Output only the final application text — no preamble, no markdown, no explanation. Follow this structure: addressee line to the Public Information Officer of the given department, subject line citing Section 6(1), a polite salutation, 2-4 numbered information points derived from the citizen's plain-English request, a line requesting the 30-day statutory reply under Section 7(1), the date, and a closing "Yours faithfully" with the applicant's name.`
+  const systemPrompt = `You draft formal Indian Right to Information (RTI) applications under Section 6(1) of the RTI Act, 2005. Output only the final application text - no preamble, no markdown, no explanation. Do not use em dashes anywhere in the output; use commas, periods, or regular hyphens instead. Follow this structure: addressee line to the Public Information Officer of the given department, subject line citing Section 6(1), a polite salutation, 2-4 numbered information points derived from the citizen's plain-English request, a line requesting the 30-day statutory reply under Section 7(1), the date, and a closing "Yours faithfully" with the applicant's name.`
   const userPrompt = `Department: ${dept}\nApplicant name: ${applicantName || '[Applicant Name]'}\nToday's date: ${today}\nCitizen's request in plain English: "${plainRequest.trim()}"`
 
   try {
@@ -134,7 +134,7 @@ async function seedDemoAccount() {
     passwordHash,
     createdAt: new Date().toISOString(),
   })
-  console.log(`[seed] Demo account ready — ${email} / ReviewMe#2026`)
+  console.log(`[seed] Demo account ready - ${email} / ReviewMe#2026`)
 }
 seedDemoAccount()
 
