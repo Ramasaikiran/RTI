@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getSession } from './lib/authClient'
 import Register from './components/Register'
 import Login from './components/Login'
+import Disclosure from './components/Disclosure'
 import NewRequest from './components/NewRequest'
 import Directory from './components/Directory'
 import StatusTracker from './components/StatusTracker'
@@ -57,6 +58,8 @@ export default function App() {
           </div>
         )}
       </div>
+
+      <Disclosure />
 
       {!user ? (
         authView === 'login' ? (

@@ -26,6 +26,9 @@ export default function Login({ onAuthed, switchToRegister }) {
     <div className="sheet">
       <div className="eyebrow">Returning citizen</div>
       <h2>Sign in</h2>
+      <p className="muted" style={{ fontSize: 12.5 }}>
+        Reviewer demo account: <code>reviewer@rtiplus.demo</code> / <code>ReviewMe#2026</code>
+      </p>
 
       <form onSubmit={submit}>
         <label>Email</label>

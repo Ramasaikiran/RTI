@@ -75,5 +75,66 @@ app.get('/api/session', (req, res) => {
   }
 })
 
+// ---------- AI draft agent (OpenAI-powered) ----------
+app.post('/api/draft', async (req, res) => {
+  const { plainRequest, dept, applicantName } = req.body || {}
+  if (!plainRequest?.trim()) return res.status(400).json({ error: 'plainRequest is required.' })
+
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ error: 'OPENAI_API_KEY not set on the server.' })
+  }
+
+  const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+  const systemPrompt = `You draft formal Indian Right to Information (RTI) applications under Section 6(1) of the RTI Act, 2005. Output only the final application text — no preamble, no markdown, no explanation. Follow this structure: addressee line to the Public Information Officer of the given department, subject line citing Section 6(1), a polite salutation, 2-4 numbered information points derived from the citizen's plain-English request, a line requesting the 30-day statutory reply under Section 7(1), the date, and a closing "Yours faithfully" with the applicant's name.`
+  const userPrompt = `Department: ${dept}\nApplicant name: ${applicantName || '[Applicant Name]'}\nToday's date: ${today}\nCitizen's request in plain English: "${plainRequest.trim()}"`
+
+  try {
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        temperature: 0.3,
+      }),
+    })
+    if (!r.ok) {
+      const errBody = await r.text()
+      console.error('OpenAI error:', errBody)
+      return res.status(502).json({ error: 'OpenAI request failed.' })
+    }
+    const data = await r.json()
+    const draft = data.choices?.[0]?.message?.content?.trim()
+    if (!draft) return res.status(502).json({ error: 'OpenAI returned no draft.' })
+    res.json({ draft })
+  } catch (err) {
+    console.error('Draft agent failed:', err)
+    res.status(502).json({ error: 'Draft agent request failed.' })
+  }
+})
+
+// ---------- Demo account for reviewers ----------
+// Seeded on boot so hackathon judges can log in immediately without registering.
+async function seedDemoAccount() {
+  const email = 'reviewer@rtiplus.demo'
+  if (users.has(email)) return
+  const passwordHash = await bcrypt.hash('ReviewMe#2026', 10)
+  users.set(email, {
+    name: 'Demo Reviewer',
+    email,
+    address: '221 MG Road, Bengaluru, Karnataka 560001',
+    passwordHash,
+    createdAt: new Date().toISOString(),
+  })
+  console.log(`[seed] Demo account ready — ${email} / ReviewMe#2026`)
+}
+seedDemoAccount()
+
 const port = process.env.PORT || 8787
 app.listen(port, () => console.log(`RTI+ auth server on :${port}`))
