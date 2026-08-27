@@ -75,13 +75,13 @@ app.get('/api/session', (req, res) => {
   }
 })
 
-// ---------- AI draft agent (OpenAI-powered) ----------
+// ---------- AI draft agent (OpenAI model, via OpenRouter) ----------
 app.post('/api/draft', async (req, res) => {
   const { plainRequest, dept, applicantName } = req.body || {}
   if (!plainRequest?.trim()) return res.status(400).json({ error: 'plainRequest is required.' })
 
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(503).json({ error: 'OPENAI_API_KEY not set on the server.' })
+  if (!process.env.OPENROUTER_API_KEY) {
+    return res.status(503).json({ error: 'OPENROUTER_API_KEY not set on the server.' })
   }
 
   const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -89,14 +89,16 @@ app.post('/api/draft', async (req, res) => {
   const userPrompt = `Department: ${dept}\nApplicant name: ${applicantName || '[Applicant Name]'}\nToday's date: ${today}\nCitizen's request in plain English: "${plainRequest.trim()}"`
 
   try {
-    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'HTTP-Referer': process.env.APP_URL || 'https://rti-plus.app',
+        'X-Title': 'RTI+',
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
@@ -106,12 +108,12 @@ app.post('/api/draft', async (req, res) => {
     })
     if (!r.ok) {
       const errBody = await r.text()
-      console.error('OpenAI error:', errBody)
-      return res.status(502).json({ error: 'OpenAI request failed.' })
+      console.error('OpenRouter error:', errBody)
+      return res.status(502).json({ error: 'AI draft request failed.' })
     }
     const data = await r.json()
     const draft = data.choices?.[0]?.message?.content?.trim()
-    if (!draft) return res.status(502).json({ error: 'OpenAI returned no draft.' })
+    if (!draft) return res.status(502).json({ error: 'Model returned no draft.' })
     res.json({ draft })
   } catch (err) {
     console.error('Draft agent failed:', err)
