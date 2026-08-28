@@ -66,8 +66,8 @@ export default function App() {
     <div className="app-shell">
       <div className="masthead">
         <div className="mark">
-          RTI+
-          <small>F.No. RTI-PLUS/2026/PROTOTYPE</small>
+          RTI
+          <small>F.No. RTI/2026/PROTOTYPE</small>
         </div>
         {session && (
           <div className="file-ref">
@@ -76,8 +76,6 @@ export default function App() {
           </div>
         )}
       </div>
-
-      <Disclosure />
 
       {!session ? (
         authView === 'login' ? (
@@ -102,6 +100,8 @@ export default function App() {
           {tab === 'directory' && <Directory />}
         </>
       )}
+
+      <Disclosure />
     </div>
   )
 }

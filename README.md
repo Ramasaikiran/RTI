@@ -1,4 +1,4 @@
-# RTI+ - a working prototype
+# RTI - a working prototype
 
 Built for the "Build What Moves India" brief: IRCTC's redesign already
 shipped, so this targets RTI Online instead, where the real gaps still

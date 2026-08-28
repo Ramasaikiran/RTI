@@ -11,8 +11,11 @@ export default function StatusTracker({ requests, summary, onEscalate }) {
   if (requests.length === 0) {
     return (
       <div className="sheet empty-state">
-        <h3>No applications filed yet</h3>
-        <p className="muted">File one from the "New request" tab - it'll show up here with a live 30-day countdown.</p>
+        <div className="redacted-lines">
+          <div></div><div></div><div></div><div></div>
+        </div>
+        <h3>Nothing on file yet</h3>
+        <p className="muted">File a request from "New request" - it'll show up here with a live 30-day countdown.</p>
       </div>
     )
   }

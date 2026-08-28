@@ -216,7 +216,7 @@ async function callModel(systemPrompt, userPrompt, { json = false } = {}) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       'HTTP-Referer': process.env.APP_URL || 'https://rti-plus.app',
-      'X-Title': 'RTI+',
+      'X-Title': 'RTI',
     },
     body: JSON.stringify({
       model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
@@ -308,4 +308,4 @@ async function seedDemoAccount() {
 seedDemoAccount()
 
 const port = process.env.PORT || 8787
-app.listen(port, () => console.log(`RTI+ auth server on :${port}`))
+app.listen(port, () => console.log(`RTI auth server on :${port}`))

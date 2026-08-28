@@ -1,24 +1,25 @@
 /* ============================================================
-   RTI+ Design Tokens
-   Subject: Indian government paperwork - carbon-copy forms,
-   file registers, rubber stamps, brass clips, ledger rules.
+   RTI Design Tokens
+   Subject: the Right to Information Act itself - the signature
+   idea is disclosure: redaction bars that reveal, not decorate.
    ============================================================ */
 :root {
-  --paper: #F2EEE1;
-  --paper-raised: #FBF8F0;
-  --ink: #201D1A;
-  --ink-soft: #5A5347;
-  --rule: #D8D0BC;
-  --stamp-red: #A8362A;
-  --stamp-red-soft: #F1DAD5;
-  --registry-green: #3C5940;
-  --registry-green-soft: #DCE5DC;
-  --brass: #A9822E;
-  --brass-soft: #EFE3C4;
+  --paper: #EDEEEA;
+  --paper-raised: #F8F8F5;
+  --ink: #14171A;
+  --ink-soft: #5B6067;
+  --rule: #CBCFC9;
+  --redact: #101113;
+  --sun: #E3A93B;
+  --sun-soft: #FBEED2;
+  --granted-green: #3F6B4E;
+  --granted-green-soft: #DEE8E0;
+  --denied-red: #AB4632;
+  --denied-red-soft: #F3DFD8;
 
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Special Elite', monospace;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 
   --radius: 2px;
 }
@@ -34,46 +35,38 @@ html, body, #root {
   font-family: var(--font-body);
 }
 
-body {
-  background-image:
-    linear-gradient(var(--rule) 1px, transparent 1px);
-  background-size: 100% 34px;
-  background-attachment: local;
-}
-
 a { color: inherit; }
-
-::selection { background: var(--brass-soft); }
+::selection { background: var(--sun-soft); }
 
 .app-shell {
   max-width: 720px;
   margin: 0 auto;
-  padding: 24px 20px 80px;
+  padding: 28px 20px 40px;
 }
 
-/* ---------- header / masthead ---------- */
+/* ---------- masthead ---------- */
 .masthead {
-  border-bottom: 3px double var(--ink);
-  padding-bottom: 14px;
-  margin-bottom: 6px;
   display: flex;
-  align-items: baseline;
+  align-items: flex-end;
   justify-content: space-between;
+  padding-bottom: 16px;
+  margin-bottom: 4px;
+  border-bottom: 3px solid var(--ink);
 }
 .masthead .mark {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 28px;
-  letter-spacing: -0.01em;
+  font-weight: 400;
+  font-size: 27px;
+  letter-spacing: 0.01em;
 }
 .masthead .mark small {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 400;
   color: var(--ink-soft);
   display: block;
   letter-spacing: 0.04em;
-  margin-top: 2px;
+  margin-top: 5px;
 }
 .file-ref {
   font-family: var(--font-mono);
@@ -83,11 +76,35 @@ a { color: inherit; }
   line-height: 1.5;
 }
 
-/* ---------- nav tabs (folder tabs) ---------- */
+/* ---------- redaction-bar eyebrow (signature element) ----------
+   A black bar that reveals its label - RTI's whole premise,
+   literalized as a UI motif rather than a plain caption. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--paper-raised);
+  background: var(--redact);
+  padding: 3px 8px;
+  margin-bottom: 10px;
+  animation: reveal 0.5s ease-out;
+}
+@keyframes reveal {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eyebrow { animation: none; }
+}
+
+/* ---------- folder tabs ---------- */
 .folder-tabs {
   display: flex;
-  gap: 4px;
-  margin: 18px 0 22px;
+  gap: 2px;
+  margin: 20px 0 22px;
   border-bottom: 1px solid var(--rule);
 }
 .folder-tab {
@@ -96,61 +113,38 @@ a { color: inherit; }
   letter-spacing: 0.03em;
   text-transform: uppercase;
   padding: 9px 14px 8px;
-  background: var(--rule);
+  background: transparent;
   color: var(--ink-soft);
   border: none;
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
-  position: relative;
-  top: 1px;
 }
 .folder-tab.active {
-  background: var(--paper-raised);
   color: var(--ink);
-  border: 1px solid var(--rule);
-  border-bottom: 1px solid var(--paper-raised);
+  border-bottom: 2px solid var(--sun);
   font-weight: 600;
 }
 
-/* ---------- card: carbon-copy sheet ---------- */
+/* ---------- card ---------- */
 .sheet {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 22px;
   margin-bottom: 16px;
-  position: relative;
-  box-shadow: 3px 3px 0 rgba(32,29,26,0.05);
-}
-.sheet::before {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: 3px;
-  background: repeating-linear-gradient(90deg, var(--ink) 0 6px, transparent 6px 11px);
-  opacity: 0.15;
-}
-
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 6px;
 }
 
 h1, h2, h3 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   margin: 0 0 8px;
-  line-height: 1.15;
+  line-height: 1.2;
 }
-h1 { font-size: 26px; }
+h1 { font-size: 25px; }
 h2 { font-size: 19px; }
 h3 { font-size: 15px; }
 
-p { line-height: 1.55; color: var(--ink); }
+p { line-height: 1.6; color: var(--ink); }
 .muted { color: var(--ink-soft); font-size: 13.5px; }
 
 /* ---------- form elements ---------- */
@@ -175,9 +169,9 @@ input, textarea, select {
 }
 textarea { resize: vertical; min-height: 90px; }
 input:focus, textarea:focus, select:focus {
-  outline: 2px solid var(--brass);
+  outline: 2px solid var(--sun);
   outline-offset: 1px;
-  border-color: var(--brass);
+  border-color: var(--sun);
 }
 
 button {
@@ -191,39 +185,38 @@ button {
   color: var(--paper-raised);
   cursor: pointer;
 }
-button:hover { opacity: 0.9; }
+button:hover { opacity: 0.88; }
 button.secondary {
   background: transparent;
   color: var(--ink);
   border: 1px solid var(--rule);
 }
 button.danger {
-  background: var(--stamp-red);
-  border-color: var(--stamp-red);
+  background: var(--denied-red);
+  border-color: var(--denied-red);
 }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .row { display: flex; gap: 10px; }
 .row > * { flex: 1; }
 
-/* ---------- stamp badge ---------- */
+/* ---------- gazette stamp (status badge) ----------
+   Rectangular and bordered, like an official gazette
+   notification stamp - not a decorative rotated circle. */
 .stamp {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: inline-block;
   font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 999px;
+  padding: 4px 9px;
+  border-radius: 0;
   border: 1.5px solid currentColor;
-  transform: rotate(-1.5deg);
 }
-.stamp.pending { color: var(--brass); background: var(--brass-soft); }
-.stamp.filed { color: var(--registry-green); background: var(--registry-green-soft); }
-.stamp.overdue { color: var(--stamp-red); background: var(--stamp-red-soft); }
-.stamp.escalated { color: var(--stamp-red); background: var(--stamp-red-soft); }
+.stamp.pending { color: var(--sun); background: var(--sun-soft); border-color: var(--sun); }
+.stamp.filed { color: var(--granted-green); background: var(--granted-green-soft); }
+.stamp.overdue { color: var(--denied-red); background: var(--denied-red-soft); }
+.stamp.escalated { color: var(--denied-red); background: var(--denied-red-soft); }
 
 /* ---------- officer directory ---------- */
 .officer-row {
@@ -240,13 +233,12 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   width: 70px;
   height: 5px;
   background: var(--rule);
-  border-radius: 3px;
   overflow: hidden;
   margin-top: 4px;
 }
-.load-bar > div { height: 100%; background: var(--registry-green); }
-.load-bar.high > div { background: var(--stamp-red); }
-.load-bar.mid > div { background: var(--brass); }
+.load-bar > div { height: 100%; background: var(--granted-green); }
+.load-bar.high > div { background: var(--denied-red); }
+.load-bar.mid > div { background: var(--sun); }
 
 /* ---------- timeline ---------- */
 .timeline { border-left: 2px solid var(--rule); padding-left: 16px; margin: 14px 0; }
@@ -256,28 +248,65 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   position: absolute;
   left: -21px; top: 3px;
   width: 9px; height: 9px;
-  border-radius: 50%;
   background: var(--ink);
   border: 2px solid var(--paper-raised);
 }
-.timeline-item.done::before { background: var(--registry-green); }
-.timeline-item.warn::before { background: var(--stamp-red); }
+.timeline-item.done::before { background: var(--granted-green); }
+.timeline-item.warn::before { background: var(--denied-red); }
 .timeline-date { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); }
 
 /* ---------- misc ---------- */
 .divider { border: none; border-top: 1px dashed var(--rule); margin: 18px 0; }
 .error-box {
-  background: var(--stamp-red-soft);
-  color: var(--stamp-red);
-  border: 1px solid var(--stamp-red);
+  background: var(--denied-red-soft);
+  color: var(--denied-red);
+  border: 1px solid var(--denied-red);
   border-radius: var(--radius);
   padding: 10px 14px;
   font-size: 13px;
   margin: 12px 0;
 }
+
+/* Redacted empty state - blacked-out lines that describe
+   themselves, rather than a generic "nothing here" message. */
 .empty-state {
+  padding: 32px 20px;
   text-align: center;
-  padding: 40px 20px;
-  color: var(--ink-soft);
 }
+.redacted-lines { max-width: 260px; margin: 0 auto 18px; }
+.redacted-lines div {
+  height: 10px;
+  background: var(--redact);
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+.redacted-lines div:nth-child(1) { width: 100%; }
+.redacted-lines div:nth-child(2) { width: 82%; }
+.redacted-lines div:nth-child(3) { width: 91%; }
+.redacted-lines div:nth-child(4) { width: 60%; }
+
 code, .mono { font-family: var(--font-mono); }
+
+/* ---------- footer disclosure (moved out of primary flow) ---------- */
+.footer-disclosure {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.footer-disclosure summary {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.footer-disclosure summary:hover { color: var(--ink); }
+.footer-disclosure .content {
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  line-height: 1.7;
+}
