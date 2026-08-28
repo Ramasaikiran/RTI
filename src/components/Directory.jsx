@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getOfficers } from '../lib/authClient'
 
 export default function Directory() {
   const [officers, setOfficers] = useState(null)
   const [error, setError] = useState('')
   const [expanded, setExpanded] = useState(null)
+  const [stateFilter, setStateFilter] = useState('All')
 
   useEffect(() => {
     getOfficers()
@@ -12,21 +13,43 @@ export default function Directory() {
       .catch(err => setError(err.message))
   }, [])
 
+  const states = useMemo(() => {
+    if (!officers) return []
+    return ['All', ...new Set(officers.map(o => o.state))]
+  }, [officers])
+
+  const filtered = useMemo(() => {
+    if (!officers) return []
+    return officers
+      .filter(o => stateFilter === 'All' || o.state === stateFilter)
+      .sort((a, b) => a.state.localeCompare(b.state) || a.dept.localeCompare(b.dept) || a.pending - b.pending)
+  }, [officers, stateFilter])
+
   return (
     <div className="sheet">
       <div className="eyebrow">What rtionline.gov.in never shows you</div>
       <h2>Officer directory</h2>
       <p className="muted">
-        Every Public Information Officer, their department, and live
-        workload - pending, resolved today, resolved total. Tap a
-        name for their full profile.
+        Every Public Information Officer, their state office, department,
+        and live workload - pending, resolved today, resolved total.
+        Tap a name for their full profile.
       </p>
+
+      {officers && (
+        <>
+          <label>Filter by state</label>
+          <select value={stateFilter} onChange={e => setStateFilter(e.target.value)}>
+            {states.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </>
+      )}
+
       <hr className="divider" />
 
       {error && <div className="error-box">{error}</div>}
       {!officers && !error && <p className="muted">Loading...</p>}
 
-      {officers?.sort((a, b) => a.dept.localeCompare(b.dept) || a.pending - b.pending).map(o => (
+      {filtered.map(o => (
         <div key={o.id}>
           <div
             className="officer-row"
@@ -35,7 +58,7 @@ export default function Directory() {
           >
             <div>
               <div className="officer-name">{o.name}</div>
-              <div className="officer-dept">{o.designation} - {o.dept}</div>
+              <div className="officer-dept">{o.designation} - {o.dept} ({o.state})</div>
               <div className="muted mono" style={{ fontSize: 11 }}>{o.id} - avg reply {o.avgReplyDays}d</div>
             </div>
             <div style={{ textAlign: 'right' }}>

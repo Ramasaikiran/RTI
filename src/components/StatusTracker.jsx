@@ -74,8 +74,14 @@ function RequestCard({ r, onEscalate }) {
       <div className="timeline" style={{ marginTop: 14 }}>
         <div className="timeline-item done">
           <div className="timeline-date">{new Date(r.filedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
-          <div>Filed with {r.dept}, assigned to {r.officerName}</div>
+          <div>Filed with {r.dept}, assigned to {r.officerName} ({r.officerState})</div>
         </div>
+        {r.assignmentNote && (
+          <div className="timeline-item">
+            <div className="timeline-date">Note</div>
+            <div className="muted" style={{ fontSize: 12.5 }}>{r.assignmentNote}</div>
+          </div>
+        )}
 
         {r.status === 'pending' && (
           <div className={`timeline-item ${overdue ? 'warn' : ''}`}>

@@ -124,7 +124,8 @@ app.post('/api/requests', requireAuth, (req, res) => {
 
   const user = users.get(req.auth.email)
   const dept = deptOverride || routeDepartment(plainRequest)
-  const officer = assignOfficer(dept, requests)
+  const applicantState = applicant?.state || ''
+  const { officer, assignmentNote } = assignOfficer(dept, applicantState, requests)
 
   const record = {
     id: `RTI-${requestSeq++}`,
@@ -135,6 +136,8 @@ app.post('/api/requests', requireAuth, (req, res) => {
     dept,
     officerId: officer.id,
     officerName: officer.name,
+    officerState: officer.state,
+    assignmentNote,
     filedAt: new Date().toISOString(),
     status: 'pending',
     resolvedAt: null,
@@ -303,7 +306,7 @@ async function seedDemoAccount() {
     createdAt: new Date().toISOString(),
   })
   console.log(`[seed] Citizen demo account - ${email} / ReviewMe#2026`)
-  console.log(`[seed] Officer demo login - any officer ID (e.g. PIO-DL-014) / ${OFFICER_DEMO_PASSWORD}`)
+  console.log(`[seed] Officer demo login - any officer ID (e.g. PIO-DL-010) / ${OFFICER_DEMO_PASSWORD}`)
 }
 seedDemoAccount()
 

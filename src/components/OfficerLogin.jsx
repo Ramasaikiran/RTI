@@ -27,12 +27,12 @@ export default function OfficerLogin({ onAuthed, switchToCitizenLogin }) {
       <div className="eyebrow">Public Information Officer</div>
       <h2>Officer sign in</h2>
       <p className="muted" style={{ fontSize: 12.5 }}>
-        Demo login: any officer ID from the directory (e.g. <code>PIO-DL-014</code>) / <code>Officer#2026</code>
+        Demo login: any officer ID from the directory (e.g. <code>PIO-DL-010</code>) / <code>Officer#2026</code>
       </p>
 
       <form onSubmit={submit}>
         <label>Officer ID</label>
-        <input value={officerId} onChange={e => setOfficerId(e.target.value)} placeholder="PIO-DL-014" required />
+        <input value={officerId} onChange={e => setOfficerId(e.target.value)} placeholder="PIO-DL-010" required />
         <label>Password</label>
         <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
         {error && <div className="error-box">{error}</div>}
