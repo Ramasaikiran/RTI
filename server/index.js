@@ -207,42 +207,86 @@ app.get('/api/officer/rejection-reasons', requireAuth, requireOfficer, (req, res
   res.json({ reasons: REJECTION_REASONS })
 })
 
+// ---------- Shared OpenRouter caller ----------
+async function callModel(systemPrompt, userPrompt, { json = false } = {}) {
+  if (!process.env.OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not set on the server.')
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'HTTP-Referer': process.env.APP_URL || 'https://rti-plus.app',
+      'X-Title': 'RTI+',
+    },
+    body: JSON.stringify({
+      model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
+      messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+      temperature: 0.3,
+      ...(json ? { response_format: { type: 'json_object' } } : {}),
+    }),
+  })
+  if (!r.ok) {
+    console.error('OpenRouter error:', await r.text())
+    throw new Error('AI request failed.')
+  }
+  const data = await r.json()
+  const content = data.choices?.[0]?.message?.content?.trim()
+  if (!content) throw new Error('Model returned no content.')
+  return content
+}
+
 // ---------- AI draft agent (OpenAI model, via OpenRouter) ----------
 app.post('/api/draft', async (req, res) => {
   const { plainRequest, dept, applicantName } = req.body || {}
   if (!plainRequest?.trim()) return res.status(400).json({ error: 'plainRequest is required.' })
-  if (!process.env.OPENROUTER_API_KEY) return res.status(503).json({ error: 'OPENROUTER_API_KEY not set on the server.' })
 
   const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
   const systemPrompt = `You draft formal Indian Right to Information (RTI) applications under Section 6(1) of the RTI Act, 2005. Output only the final application text - no preamble, no markdown, no explanation. Do not use em dashes anywhere in the output; use commas, periods, or regular hyphens instead. Never phrase points as "why" or "how" questions demanding justification - RTI only covers requests for existing records, so rewrite justification-seeking language into a request for the relevant records, file notings, or correspondence instead. Follow this structure: addressee line to the Public Information Officer of the given department, subject line citing Section 6(1), a polite salutation, 2-4 numbered information points derived from the citizen's plain-English request, a line requesting the 30-day statutory reply under Section 7(1), the date, and a closing "Yours faithfully" with the applicant's name.`
   const userPrompt = `Department: ${dept}\nApplicant name: ${applicantName || '[Applicant Name]'}\nToday's date: ${today}\nCitizen's request in plain English: "${plainRequest.trim()}"`
 
   try {
-    const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'HTTP-Referer': process.env.APP_URL || 'https://rti-plus.app',
-        'X-Title': 'RTI+',
-      },
-      body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
-        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
-        temperature: 0.3,
-      }),
-    })
-    if (!r.ok) {
-      console.error('OpenRouter error:', await r.text())
-      return res.status(502).json({ error: 'AI draft request failed.' })
-    }
-    const data = await r.json()
-    const draft = data.choices?.[0]?.message?.content?.trim()
-    if (!draft) return res.status(502).json({ error: 'Model returned no draft.' })
+    const draft = await callModel(systemPrompt, userPrompt)
     res.json({ draft })
   } catch (err) {
     console.error('Draft agent failed:', err)
-    res.status(502).json({ error: 'Draft agent request failed.' })
+    res.status(502).json({ error: err.message })
+  }
+})
+
+// ---------- AI rejection-risk checker ----------
+// Reviews the drafted application for the specific, documented ways
+// RTI applications actually get rejected, before the citizen files.
+app.post('/api/analyze-risk', async (req, res) => {
+  const { draft } = req.body || {}
+  if (!draft?.trim()) return res.status(400).json({ error: 'draft is required.' })
+
+  const systemPrompt = `You review formal Indian RTI applications for rejection risk, based on real documented rejection grounds: (1) phrasing that demands justification via "why" or "how" instead of requesting existing records, (2) vague or multiple unrelated questions bundled into one application, (3) information likely covered by a Section 8 exemption (personal information with no public interest, cabinet papers, ongoing investigation details), (4) requests for records that likely do not exist in the form asked. Respond with ONLY a JSON object, no markdown, in this exact shape: {"riskLevel": "low" | "medium" | "high", "issues": ["short issue 1", "short issue 2"], "note": "one short sentence"}. If there are no issues, use riskLevel "low" and an empty issues array.`
+  const userPrompt = `Review this drafted RTI application:\n\n${draft.trim()}`
+
+  try {
+    const raw = await callModel(systemPrompt, userPrompt, { json: true })
+    const parsed = JSON.parse(raw)
+    res.json(parsed)
+  } catch (err) {
+    console.error('Risk check failed:', err)
+    res.status(502).json({ error: err.message })
+  }
+})
+
+// ---------- AI officer reply suggestion ----------
+app.post('/api/officer/suggest-reply', requireAuth, requireOfficer, async (req, res) => {
+  const { plainRequest, dept } = req.body || {}
+  if (!plainRequest?.trim()) return res.status(400).json({ error: 'plainRequest is required.' })
+
+  const systemPrompt = `You are a Public Information Officer drafting a plausible, brief reply to an RTI request, for a hackathon prototype using mock data. Invent realistic-sounding but clearly fictional details (dates, counts, names of internal processes) - never claim this is real government data. Output only the reply text, 2-4 sentences, no preamble, no em dashes.`
+  const userPrompt = `Department: ${dept}\nCitizen's request: "${plainRequest.trim()}"\n\nDraft a short reply as if providing the requested information.`
+
+  try {
+    const reply = await callModel(systemPrompt, userPrompt)
+    res.json({ reply })
+  } catch (err) {
+    console.error('Reply suggestion failed:', err)
+    res.status(502).json({ error: err.message })
   }
 })
 

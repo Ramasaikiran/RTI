@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { routeDepartment, departments } from '../data/officers'
 import { indianStates } from '../data/states'
 import { draftApplication } from '../lib/draftAgent'
-import { fileRequest } from '../lib/authClient'
+import { fileRequest, analyzeRisk } from '../lib/authClient'
 
 const emptyApplicant = {
   mobile: '',
@@ -23,6 +23,7 @@ export default function NewRequest({ applicantName, applicantAddress, token, onF
   const [applicant, setApplicant] = useState({ ...emptyApplicant })
   const [plainRequest, setPlainRequest] = useState('')
   const [draft, setDraft] = useState('')
+  const [risk, setRisk] = useState(null)
   const [error, setError] = useState('')
 
   function setField(field, value) {
@@ -39,10 +40,12 @@ export default function NewRequest({ applicantName, applicantAddress, token, onF
     if (!plainRequest.trim()) return
     setStep('drafting')
     setError('')
+    setRisk(null)
     const routedDept = dept || routeDepartment(plainRequest)
     const text = await draftApplication({ plainRequest, dept: routedDept, applicantName })
     setDraft(text)
     setStep('review')
+    analyzeRisk(text).then(setRisk).catch(() => setRisk(null))
   }
 
   async function file() {
@@ -198,6 +201,22 @@ export default function NewRequest({ applicantName, applicantAddress, token, onF
             style={{ minHeight: 260, fontFamily: 'var(--font-mono)', fontSize: 12.5 }}
             disabled={step === 'filing'}
           />
+
+          {risk === null && step === 'review' && (
+            <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>Checking for rejection-risk phrasing...</p>
+          )}
+          {risk && (
+            <div className="sheet" style={{ padding: 14, marginTop: 10, background: risk.riskLevel === 'low' ? 'var(--registry-green-soft)' : risk.riskLevel === 'medium' ? 'var(--brass-soft)' : 'var(--stamp-red-soft)' }}>
+              <div className="eyebrow" style={{ margin: 0 }}>AI rejection-risk check: {risk.riskLevel}</div>
+              {risk.issues?.length > 0 && (
+                <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 12.5 }}>
+                  {risk.issues.map((issue, i) => <li key={i}>{issue}</li>)}
+                </ul>
+              )}
+              {risk.note && <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>{risk.note}</p>}
+            </div>
+          )}
+
           {error && <div className="error-box">{error}</div>}
           <div className="row" style={{ marginTop: 14 }}>
             <button onClick={file} disabled={step === 'filing'}>

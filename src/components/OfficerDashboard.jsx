@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getOfficerQueue, resolveRequest, getRejectionReasons } from '../lib/authClient'
+import { getOfficerQueue, resolveRequest, getRejectionReasons, suggestReply } from '../lib/authClient'
 
 export default function OfficerDashboard({ token, officer }) {
   const [requests, setRequests] = useState([])
@@ -53,7 +53,7 @@ export default function OfficerDashboard({ token, officer }) {
       <div className="eyebrow" style={{ margin: '18px 0 8px' }}>Queue ({pending.length})</div>
       {pending.length === 0 && <p className="muted">Nothing pending. Queue is clear.</p>}
       {pending.map(r => (
-        <QueueCard key={r.id} r={r} reasons={reasons} onResolve={resolve} />
+        <QueueCard key={r.id} r={r} reasons={reasons} onResolve={resolve} token={token} />
       ))}
 
       {resolved.length > 0 && (
@@ -88,12 +88,25 @@ function Stat({ label, value, tone }) {
   )
 }
 
-function QueueCard({ r, reasons, onResolve }) {
+function QueueCard({ r, reasons, onResolve, token }) {
   const [mode, setMode] = useState(null) // null | 'accepting' | 'rejecting'
   const [reason, setReason] = useState(reasons[0] || '')
   const [reply, setReply] = useState('')
+  const [suggesting, setSuggesting] = useState(false)
   const [applicantOpen, setApplicantOpen] = useState(false)
   const a = r.applicantDetails || {}
+
+  async function fillWithAI() {
+    setSuggesting(true)
+    try {
+      const data = await suggestReply(r.plainRequest, r.dept, token)
+      setReply(data.reply)
+    } catch {
+      /* leave reply box empty on failure, officer can still type manually */
+    } finally {
+      setSuggesting(false)
+    }
+  }
 
   return (
     <div className="sheet">
@@ -130,7 +143,12 @@ function QueueCard({ r, reasons, onResolve }) {
         <>
           <label>Reply to the applicant (required to accept)</label>
           <textarea value={reply} onChange={e => setReply(e.target.value)} placeholder="The information requested is as follows..." style={{ minHeight: 80 }} />
-          <div className="row" style={{ marginTop: 12 }}>
+          <div className="row" style={{ marginTop: 10 }}>
+            <button type="button" className="secondary" onClick={fillWithAI} disabled={suggesting}>
+              {suggesting ? 'Drafting...' : 'Suggest reply with AI'}
+            </button>
+          </div>
+          <div className="row" style={{ marginTop: 10 }}>
             <button onClick={() => reply.trim() && onResolve(r.id, 'accepted', { reply })} disabled={!reply.trim()}>Send reply &amp; accept</button>
             <button className="secondary" onClick={() => setMode(null)}>Cancel</button>
           </div>

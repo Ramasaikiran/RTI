@@ -47,3 +47,9 @@ export const resolveRequest = (id, decision, reason, reply, token) =>
   call(`/api/officer/requests/${id}/resolve`, { method: 'POST', body: { decision, reason, reply }, token })
 export const getRejectionReasons = (token) =>
   call('/api/officer/rejection-reasons', { token })
+export const suggestReply = (plainRequest, dept, token) =>
+  call('/api/officer/suggest-reply', { method: 'POST', body: { plainRequest, dept }, token })
+
+// AI risk check (public - runs during drafting, before login-gated filing)
+export const analyzeRisk = (draft) =>
+  call('/api/analyze-risk', { method: 'POST', body: { draft } })
