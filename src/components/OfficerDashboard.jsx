@@ -23,10 +23,10 @@ export default function OfficerDashboard({ token, officer }) {
 
   useEffect(() => { load() }, [])
 
-  async function resolve(id, decision, reason) {
+  async function resolve(id, decision, extra) {
     setError('')
     try {
-      await resolveRequest(id, decision, reason, token)
+      await resolveRequest(id, decision, extra.reason, extra.reply, token)
       await load()
     } catch (err) {
       setError(err.message)
@@ -68,6 +68,9 @@ export default function OfficerDashboard({ token, officer }) {
                 </div>
                 <span className={`stamp ${r.status === 'accepted' ? 'filed' : 'overdue'}`}>{r.status}</span>
               </div>
+              {r.status === 'accepted' && r.reply && (
+                <p className="muted" style={{ fontSize: 12.5, marginTop: 6 }}><strong>Reply sent:</strong> {r.reply}</p>
+              )}
             </div>
           ))}
         </>
@@ -86,8 +89,11 @@ function Stat({ label, value, tone }) {
 }
 
 function QueueCard({ r, reasons, onResolve }) {
-  const [rejecting, setRejecting] = useState(false)
+  const [mode, setMode] = useState(null) // null | 'accepting' | 'rejecting'
   const [reason, setReason] = useState(reasons[0] || '')
+  const [reply, setReply] = useState('')
+  const [applicantOpen, setApplicantOpen] = useState(false)
+  const a = r.applicantDetails || {}
 
   return (
     <div className="sheet">
@@ -95,20 +101,51 @@ function QueueCard({ r, reasons, onResolve }) {
       <h3>{r.plainRequest}</h3>
       <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)', fontSize: 12, background: '#fff', border: '1px solid var(--rule)', padding: 10, borderRadius: 2 }}>{r.draft}</pre>
 
-      {!rejecting ? (
-        <div className="row" style={{ marginTop: 12 }}>
-          <button onClick={() => onResolve(r.id, 'accepted')}>Accept</button>
-          <button className="danger" onClick={() => setRejecting(true)}>Reject</button>
+      <div
+        className="eyebrow"
+        style={{ cursor: 'pointer', marginTop: 10 }}
+        onClick={() => setApplicantOpen(o => !o)}
+      >
+        {applicantOpen ? '\u2212' : '+'} Applicant details
+      </div>
+      {applicantOpen && (
+        <div className="muted" style={{ fontSize: 12, marginTop: 6, lineHeight: 1.7 }}>
+          {r.applicantName} - {a.address}{a.pinCode ? `, ${a.pinCode}` : ''}{a.state ? `, ${a.state}` : ''}<br />
+          {a.gender && <>Gender: {a.gender}. </>}
+          {a.areaStatus && <>{a.areaStatus}. </>}
+          {a.educationalStatus && <>{a.educationalStatus}. </>}
+          {a.mobile && <>Mobile: {a.mobile}. </>}
+          {a.isBPL === 'Yes' && <>BPL: card {a.bplCardNo}, issued {a.bplYearOfIssue} by {a.bplIssuingAuthority}.</>}
         </div>
-      ) : (
+      )}
+
+      {mode === null && (
+        <div className="row" style={{ marginTop: 12 }}>
+          <button onClick={() => setMode('accepting')}>Accept</button>
+          <button className="danger" onClick={() => setMode('rejecting')}>Reject</button>
+        </div>
+      )}
+
+      {mode === 'accepting' && (
+        <>
+          <label>Reply to the applicant (required to accept)</label>
+          <textarea value={reply} onChange={e => setReply(e.target.value)} placeholder="The information requested is as follows..." style={{ minHeight: 80 }} />
+          <div className="row" style={{ marginTop: 12 }}>
+            <button onClick={() => reply.trim() && onResolve(r.id, 'accepted', { reply })} disabled={!reply.trim()}>Send reply &amp; accept</button>
+            <button className="secondary" onClick={() => setMode(null)}>Cancel</button>
+          </div>
+        </>
+      )}
+
+      {mode === 'rejecting' && (
         <>
           <label>Rejection reason</label>
           <select value={reason} onChange={e => setReason(e.target.value)}>
             {reasons.map(r2 => <option key={r2} value={r2}>{r2}</option>)}
           </select>
           <div className="row" style={{ marginTop: 12 }}>
-            <button className="danger" onClick={() => onResolve(r.id, 'rejected', reason)}>Confirm rejection</button>
-            <button className="secondary" onClick={() => setRejecting(false)}>Cancel</button>
+            <button className="danger" onClick={() => onResolve(r.id, 'rejected', { reason })}>Confirm rejection</button>
+            <button className="secondary" onClick={() => setMode(null)}>Cancel</button>
           </div>
         </>
       )}

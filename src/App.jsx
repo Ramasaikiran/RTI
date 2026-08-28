@@ -97,7 +97,7 @@ export default function App() {
             <button className={`folder-tab ${tab === 'directory' ? 'active' : ''}`} onClick={() => setTab('directory')}>Officer directory</button>
           </div>
 
-          {tab === 'new' && <NewRequest applicantName={session.user.name} token={token()} onFiled={onFiled} />}
+          {tab === 'new' && <NewRequest applicantName={session.user.name} applicantAddress={session.user.address} token={token()} onFiled={onFiled} />}
           {tab === 'status' && <StatusTracker requests={requests} summary={summary} onEscalate={escalate} />}
           {tab === 'directory' && <Directory />}
         </>

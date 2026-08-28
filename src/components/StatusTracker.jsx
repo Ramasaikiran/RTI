@@ -98,6 +98,13 @@ function RequestCard({ r, onEscalate }) {
         )}
       </div>
 
+      {r.status === 'accepted' && r.reply && (
+        <div className="sheet" style={{ padding: 14, marginTop: 4, background: 'var(--registry-green-soft)' }}>
+          <strong>Reply from {r.officerName}:</strong>
+          <p style={{ margin: '6px 0 0' }}>{r.reply}</p>
+        </div>
+      )}
+
       {r.status === 'rejected' && r.rejectionReason && (
         <div className="error-box" style={{ marginTop: 4 }}>
           <strong>Reason given:</strong> {r.rejectionReason}

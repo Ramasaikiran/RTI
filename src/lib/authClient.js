@@ -30,10 +30,11 @@ export const getSession = (token) =>
 
 // Officer directory (public)
 export const getOfficers = () => call('/api/officers')
+export const getDepartments = () => call('/api/departments')
 
 // Citizen requests
-export const fileRequest = (plainRequest, draft, token) =>
-  call('/api/requests', { method: 'POST', body: { plainRequest, draft }, token })
+export const fileRequest = (plainRequest, draft, deptOverride, applicant, token) =>
+  call('/api/requests', { method: 'POST', body: { plainRequest, draft, deptOverride, applicant }, token })
 export const getMyRequests = (token) =>
   call('/api/requests/mine', { token })
 export const escalateRequest = (id, token) =>
@@ -42,7 +43,7 @@ export const escalateRequest = (id, token) =>
 // Officer dashboard
 export const getOfficerQueue = (token) =>
   call('/api/officer/requests', { token })
-export const resolveRequest = (id, decision, reason, token) =>
-  call(`/api/officer/requests/${id}/resolve`, { method: 'POST', body: { decision, reason }, token })
+export const resolveRequest = (id, decision, reason, reply, token) =>
+  call(`/api/officer/requests/${id}/resolve`, { method: 'POST', body: { decision, reason, reply }, token })
 export const getRejectionReasons = (token) =>
   call('/api/officer/rejection-reasons', { token })

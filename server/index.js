@@ -3,7 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { officers, OFFICER_DEMO_PASSWORD, routeDepartment, assignOfficer, officerStats } from './officers.js'
+import { officers, departments, OFFICER_DEMO_PASSWORD, routeDepartment, assignOfficer, officerStats } from './officers.js'
 
 const app = express()
 app.use(cors())
@@ -112,14 +112,18 @@ app.get('/api/officers', (req, res) => {
   res.json({ officers: withStats })
 })
 
+app.get('/api/departments', (req, res) => {
+  res.json({ departments })
+})
+
 // ---------- File a new RTI request ----------
 app.post('/api/requests', requireAuth, (req, res) => {
   if (req.auth.role !== 'citizen') return res.status(403).json({ error: 'Citizen login required.' })
-  const { plainRequest, draft } = req.body || {}
+  const { plainRequest, draft, deptOverride, applicant } = req.body || {}
   if (!plainRequest?.trim() || !draft?.trim()) return res.status(400).json({ error: 'plainRequest and draft are required.' })
 
   const user = users.get(req.auth.email)
-  const dept = routeDepartment(plainRequest)
+  const dept = deptOverride || routeDepartment(plainRequest)
   const officer = assignOfficer(dept, requests)
 
   const record = {
@@ -135,6 +139,22 @@ app.post('/api/requests', requireAuth, (req, res) => {
     status: 'pending',
     resolvedAt: null,
     rejectionReason: null,
+    reply: null,
+    // Applicant/request detail fields mirroring the official RTI Online form
+    applicantDetails: {
+      mobile: applicant?.mobile?.trim() || '',
+      gender: applicant?.gender || '',
+      address: applicant?.address?.trim() || user.address,
+      pinCode: applicant?.pinCode?.trim() || '',
+      state: applicant?.state || '',
+      areaStatus: applicant?.areaStatus || '',
+      educationalStatus: applicant?.educationalStatus || '',
+      citizenship: 'Indian',
+      isBPL: applicant?.isBPL || 'No',
+      bplCardNo: applicant?.isBPL === 'Yes' ? (applicant?.bplCardNo?.trim() || '') : '',
+      bplYearOfIssue: applicant?.isBPL === 'Yes' ? (applicant?.bplYearOfIssue?.trim() || '') : '',
+      bplIssuingAuthority: applicant?.isBPL === 'Yes' ? (applicant?.bplIssuingAuthority?.trim() || '') : '',
+    },
   }
   requests.push(record)
   res.json({ request: record })
@@ -169,8 +189,9 @@ app.get('/api/officer/requests', requireAuth, requireOfficer, (req, res) => {
 
 // ---------- Officer: resolve a request (accept/reject) ----------
 app.post('/api/officer/requests/:id/resolve', requireAuth, requireOfficer, (req, res) => {
-  const { decision, reason } = req.body || {}
+  const { decision, reason, reply } = req.body || {}
   if (!['accepted', 'rejected'].includes(decision)) return res.status(400).json({ error: 'decision must be accepted or rejected.' })
+  if (decision === 'accepted' && !reply?.trim()) return res.status(400).json({ error: 'A reply is required to accept a request.' })
   const record = requests.find(r => r.id === req.params.id && r.officerId === req.auth.officerId)
   if (!record) return res.status(404).json({ error: 'Request not found in your queue.' })
   if (record.status !== 'pending') return res.status(409).json({ error: 'Already resolved.' })
@@ -178,6 +199,7 @@ app.post('/api/officer/requests/:id/resolve', requireAuth, requireOfficer, (req,
   record.status = decision
   record.resolvedAt = new Date().toISOString()
   record.rejectionReason = decision === 'rejected' ? (reason?.trim() || REJECTION_REASONS[0]) : null
+  record.reply = decision === 'accepted' ? reply.trim() : null
   res.json({ request: record })
 })
 
