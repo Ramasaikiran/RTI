@@ -3,12 +3,11 @@ import { useMemo } from 'react'
 const DAY = 24 * 60 * 60 * 1000
 
 function daysLeft(filedAt) {
-  const deadline = new Date(filedAt.getTime() + 30 * DAY)
-  const diff = Math.ceil((deadline - new Date()) / DAY)
-  return diff
+  const deadline = new Date(filedAt).getTime() + 30 * DAY
+  return Math.ceil((deadline - Date.now()) / DAY)
 }
 
-export default function StatusTracker({ requests, onEscalate }) {
+export default function StatusTracker({ requests, summary, onEscalate }) {
   if (requests.length === 0) {
     return (
       <div className="sheet empty-state">
@@ -20,6 +19,16 @@ export default function StatusTracker({ requests, onEscalate }) {
 
   return (
     <>
+      <div className="sheet" style={{ padding: 16 }}>
+        <div className="eyebrow">Your submission record</div>
+        <div className="row" style={{ textAlign: 'center', marginTop: 8 }}>
+          <Stat label="Filed" value={summary.total} />
+          <Stat label="Accepted" value={summary.accepted} tone="registry-green" />
+          <Stat label="Rejected" value={summary.rejected} tone="stamp-red" />
+          <Stat label="Pending" value={summary.pending} tone="brass" />
+        </div>
+      </div>
+
       {requests.map(r => (
         <RequestCard key={r.id} r={r} onEscalate={onEscalate} />
       ))}
@@ -27,35 +36,60 @@ export default function StatusTracker({ requests, onEscalate }) {
   )
 }
 
+function Stat({ label, value, tone }) {
+  return (
+    <div style={{ flex: 1 }}>
+      <div className="mono" style={{ fontSize: 22, fontWeight: 600, color: tone ? `var(--${tone})` : 'var(--ink)' }}>{value}</div>
+      <div className="muted" style={{ fontSize: 11 }}>{label}</div>
+    </div>
+  )
+}
+
 function RequestCard({ r, onEscalate }) {
   const left = useMemo(() => daysLeft(r.filedAt), [r.filedAt])
-  const overdue = left < 0
-  const status = r.escalated ? 'escalated' : overdue ? 'overdue' : 'pending'
-  const statusLabel = r.escalated ? 'First appeal filed' : overdue ? 'Deadline passed' : `${left}d remaining`
+  const overdue = left < 0 && r.status === 'pending'
+
+  let statusClass = 'pending'
+  let statusLabel = `${left}d remaining`
+  if (r.status === 'accepted') { statusClass = 'filed'; statusLabel = 'Accepted' }
+  else if (r.status === 'rejected') { statusClass = 'overdue'; statusLabel = 'Rejected' }
+  else if (r.escalated) { statusClass = 'escalated'; statusLabel = 'First appeal filed' }
+  else if (overdue) { statusClass = 'overdue'; statusLabel = 'Deadline passed' }
 
   return (
     <div className="sheet">
       <div className="row" style={{ alignItems: 'flex-start' }}>
         <div>
           <div className="eyebrow mono">{r.id}</div>
-          <h3>{r.plainRequest.length > 70 ? r.plainRequest.slice(0, 70) + '…' : r.plainRequest}</h3>
+          <h3>{r.plainRequest.length > 70 ? r.plainRequest.slice(0, 70) + '...' : r.plainRequest}</h3>
         </div>
         <div style={{ flex: '0 0 auto', textAlign: 'right' }}>
-          <span className={`stamp ${status}`}>{statusLabel}</span>
+          <span className={`stamp ${statusClass}`}>{statusLabel}</span>
         </div>
       </div>
 
       <div className="timeline" style={{ marginTop: 14 }}>
         <div className="timeline-item done">
-          <div className="timeline-date">{r.filedAt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
-          <div>Filed with {r.dept}, assigned to {r.officer.name}</div>
+          <div className="timeline-date">{new Date(r.filedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
+          <div>Filed with {r.dept}, assigned to {r.officerName}</div>
         </div>
-        <div className={`timeline-item ${overdue ? 'warn' : ''}`}>
-          <div className="timeline-date">
-            {new Date(r.filedAt.getTime() + 30 * DAY).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+
+        {r.status === 'pending' && (
+          <div className={`timeline-item ${overdue ? 'warn' : ''}`}>
+            <div className="timeline-date">
+              {new Date(new Date(r.filedAt).getTime() + 30 * DAY).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+            </div>
+            <div>Statutory 30-day reply deadline {overdue ? '- passed, no response logged' : ''}</div>
           </div>
-          <div>Statutory 30-day reply deadline {overdue ? '- passed, no response logged' : ''}</div>
-        </div>
+        )}
+
+        {r.status !== 'pending' && (
+          <div className={`timeline-item ${r.status === 'rejected' ? 'warn' : 'done'}`}>
+            <div className="timeline-date">{new Date(r.resolvedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
+            <div>{r.status === 'accepted' ? 'Marked accepted by ' + r.officerName : 'Rejected by ' + r.officerName}</div>
+          </div>
+        )}
+
         {r.escalated && (
           <div className="timeline-item warn">
             <div className="timeline-date">Today</div>
@@ -63,6 +97,12 @@ function RequestCard({ r, onEscalate }) {
           </div>
         )}
       </div>
+
+      {r.status === 'rejected' && r.rejectionReason && (
+        <div className="error-box" style={{ marginTop: 4 }}>
+          <strong>Reason given:</strong> {r.rejectionReason}
+        </div>
+      )}
 
       {overdue && !r.escalated && (
         <button className="danger" onClick={() => onEscalate(r.id)}>
